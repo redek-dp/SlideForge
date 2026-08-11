@@ -1,145 +1,85 @@
-import { useRef } from "react";
-import {
-  DownloadIcon,
-  FileIcon,
-  ImagePlusIcon,
-  LogoIcon,
-  RedoIcon,
-  ShapeIcon,
-  TextIcon,
-  UndoIcon,
-  UploadIcon,
-} from "./icons";
-
-interface Props {
-  name: string;
-  onRename: (v: string) => void;
-  beginEdit: () => void;
-  endEdit: () => void;
+interface ToolbarProps {
+  currentSlide: number;
   slideCount: number;
-  aspect: string;
-  canUndo: boolean;
-  canRedo: boolean;
-  onUndo: () => void;
-  onRedo: () => void;
-  onAddText: () => void;
-  onAddShape: () => void;
-  onAddImage: (f: File) => void;
-  onNew: () => void;
-  onOpen: (f: File) => void;
-  onExport: () => void;
-  exporting: boolean;
+  zoom: number;
+  onZoomChange: (zoom: number) => void;
+  onSlideChange: (index: number) => void;
 }
 
-const ghost =
-  "flex items-center gap-1.5 rounded-md border border-line bg-ink-750 px-2.5 py-1.5 text-[12px] text-dim transition hover:border-amber/50 hover:text-paper active:scale-95";
-
-export default function Toolbar(p: Props) {
-  const openRef = useRef<HTMLInputElement>(null);
-  const imgRef = useRef<HTMLInputElement>(null);
-
+export default function Toolbar({
+  currentSlide,
+  slideCount,
+  zoom,
+  onZoomChange,
+  onSlideChange,
+}: ToolbarProps) {
   return (
-    <header className="flex h-[54px] shrink-0 items-center gap-2 border-b border-line-soft bg-ink-850 px-3">
-      {/* identidade + arquivo */}
-      <div className="flex min-w-0 items-center gap-2.5">
-        <div className="flex items-center gap-2">
-          <LogoIcon size={22} />
-          <span className="font-display text-[15px] font-bold tracking-tight">
-            Slide<span className="text-amber">Forge</span>
-          </span>
-        </div>
-        <div className="h-5 w-px bg-line" />
-        <input
-          value={p.name}
-          onChange={(e) => p.onRename(e.target.value)}
-          onFocus={p.beginEdit}
-          onBlur={p.endEdit}
-          spellCheck={false}
-          title="Nome do arquivo"
-          className="w-36 truncate rounded-md border border-transparent bg-transparent px-1.5 py-1 font-mono text-[12px] text-paper outline-none transition hover:border-line focus:border-amber/60 focus:bg-ink-900 lg:w-44"
-        />
-        <span className="hidden rounded bg-ink-750 px-2 py-0.5 font-mono text-[10.5px] text-faint xl:inline">
-          {p.slideCount} {p.slideCount === 1 ? "slide" : "slides"} · {p.aspect}
+    <div className="flex items-center justify-between border-b border-slate-700 bg-slate-800 px-4 py-2">
+      {/* Slide Navigation */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => onSlideChange(currentSlide - 1)}
+          disabled={currentSlide === 0}
+          className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          title="Previous slide"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <span className="text-sm font-medium text-slate-300 min-w-[80px] text-center">
+          Slide {currentSlide + 1} of {slideCount}
         </span>
-      </div>
-
-      <div className="flex-1" />
-
-      {/* inserção */}
-      <div className="flex items-center gap-1.5">
-        <button onClick={p.onAddText} className={ghost} title="Adicionar caixa de texto">
-          <TextIcon size={13} /> <span className="hidden md:inline">Texto</span>
-        </button>
-        <button onClick={p.onAddShape} className={ghost} title="Adicionar forma">
-          <ShapeIcon size={13} /> <span className="hidden md:inline">Forma</span>
-        </button>
-        <button onClick={() => imgRef.current?.click()} className={ghost} title="Adicionar imagem">
-          <ImagePlusIcon size={13} /> <span className="hidden md:inline">Imagem</span>
-        </button>
-        <input
-          ref={imgRef}
-          type="file"
-          accept="image/png,image/jpeg,image/gif,image/svg+xml,image/bmp"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) p.onAddImage(f);
-            e.target.value = "";
-          }}
-        />
-      </div>
-
-      <div className="mx-1 h-5 w-px bg-line" />
-
-      {/* histórico */}
-      <div className="flex items-center gap-1">
         <button
-          onClick={p.onUndo}
-          disabled={!p.canUndo}
-          title="Desfazer (Ctrl+Z)"
-          className="rounded-md p-2 text-dim transition hover:bg-ink-750 hover:text-paper active:scale-90 disabled:pointer-events-none disabled:opacity-25"
+          onClick={() => onSlideChange(currentSlide + 1)}
+          disabled={currentSlide >= slideCount - 1}
+          className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          title="Next slide"
         >
-          <UndoIcon size={15} />
-        </button>
-        <button
-          onClick={p.onRedo}
-          disabled={!p.canRedo}
-          title="Refazer (Ctrl+Shift+Z)"
-          className="rounded-md p-2 text-dim transition hover:bg-ink-750 hover:text-paper active:scale-90 disabled:pointer-events-none disabled:opacity-25"
-        >
-          <RedoIcon size={15} />
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
         </button>
       </div>
 
-      <div className="mx-1 h-5 w-px bg-line" />
-
-      {/* arquivo */}
-      <button onClick={p.onNew} className={ghost} title="Nova apresentação em branco">
-        <FileIcon size={13} /> <span className="hidden lg:inline">Novo</span>
-      </button>
-      <button onClick={() => openRef.current?.click()} className={ghost} title="Abrir outro .pptx">
-        <UploadIcon size={13} /> <span className="hidden lg:inline">Abrir</span>
-      </button>
-      <input
-        ref={openRef}
-        type="file"
-        accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) p.onOpen(f);
-          e.target.value = "";
-        }}
-      />
-      <button
-        onClick={p.onExport}
-        disabled={p.exporting}
-        className="flex items-center gap-2 rounded-md bg-amber px-3.5 py-1.5 text-[12.5px] font-semibold text-ink-900 shadow-lg shadow-amber/20 transition hover:brightness-110 active:scale-95 disabled:opacity-60"
-        title="Baixar .pptx editado"
-      >
-        <DownloadIcon size={14} strokeWidth={2.4} />
-        {p.exporting ? "Gerando…" : "Exportar .pptx"}
-      </button>
-    </header>
+      {/* Zoom Controls */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onZoomChange(Math.max(25, zoom - 10))}
+          disabled={zoom <= 25}
+          className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          title="Zoom out"
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </button>
+        <span className="text-xs font-medium text-slate-400 w-12 text-center">
+          {zoom}%
+        </span>
+        <button
+          onClick={() => onZoomChange(Math.min(200, zoom + 10))}
+          disabled={zoom >= 200}
+          className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          title="Zoom in"
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="11" y1="8" x2="11" y2="14" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </button>
+        <button
+          onClick={() => onZoomChange(100)}
+          className="ml-2 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+          title="Reset zoom"
+        >
+          Fit
+        </button>
+      </div>
+    </div>
   );
 }
