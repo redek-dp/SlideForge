@@ -22,6 +22,13 @@ npm install && npm run dev
 
 --------
 
+### kexel-git
+
+```bash
+https://kexel-git.static.hf.space/slideforge.html
+```
+--------
+
 ### stackblitz
 
 ```bash
@@ -29,7 +36,6 @@ https://stackblitz.com/edit/slideforge
 ```
 
 --------
-
 
 <br />
 
